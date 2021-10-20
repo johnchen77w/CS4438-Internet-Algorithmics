@@ -1,0 +1,11 @@
+Mode Identical
+
+AddNode 10: 27 42
+AddNode 27: 10 21 
+AddNode 21: 13 27
+AddNode 13: 21 42 
+AddNode 42: 13 10
+
+LoadAlgorithm LargestID
+
+RoundTime 500

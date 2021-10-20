@@ -1,0 +1,19 @@
+Mode Identical
+
+AddNode 15: 1 12 8 71 3
+AddNode 1: 15
+AddNode 6: 12
+AddNode 12: 15 6 
+AddNode 34: 8
+AddNode 8: 15 34 
+AddNode 9: 56
+AddNode 56: 71 9
+AddNode 71: 15 56
+AddNode 3: 15 14
+AddNode 14: 3 21
+AddNode 21: 14 7
+AddNode 7: 21
+
+LoadAlgorithm Diameter
+
+RoundTime 1500
