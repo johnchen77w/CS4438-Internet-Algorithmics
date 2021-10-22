@@ -42,7 +42,7 @@ public class Position extends Algorithm {
                     if (equal(mssg.destination(), leftNeighbour)) {
                         return count;
                     }
-                    if (equal(mssg.data(), "end")) {
+                    if (equal(mssg.data(), "END")) {
                         count --;
                         return count;
                     }
@@ -51,7 +51,7 @@ public class Position extends Algorithm {
                 //Receive phase
                 m = receive();
                 if (m != null) {
-                    if (equal(m.source(), leftNeighbour) && !equal(m.data(), "end")) {
+                    if (equal(m.source(), leftNeighbour) && !equal(m.data(), "END")) {
                         mssg = makeMessage(rightNeighbour,id);
                         count++;
                         if (rightmostProcessor) {
@@ -61,7 +61,7 @@ public class Position extends Algorithm {
                         mssg = makeMessage(leftNeighbour,id);
                         count --;
                         if (leftmostProcessor) {
-                            mssg = makeMessage(rightNeighbour,"end");
+                            mssg = makeMessage(rightNeighbour,"END");
                         }
                     }
                 }
