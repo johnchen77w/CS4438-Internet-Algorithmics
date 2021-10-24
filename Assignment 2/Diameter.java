@@ -4,8 +4,6 @@ import java.util.Vector;
 
 public class Diameter extends Algorithm {
     private static int count = 0;
-    private static int spoke1 = 0;
-    private static int spoke2 = 0;
 
     /* Do not modify this method */
     public Object run() {
