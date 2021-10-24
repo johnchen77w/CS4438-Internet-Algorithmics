@@ -49,7 +49,6 @@ public class Diameter extends Algorithm {
                     if (isSpoke) {
                         count = stringToInteger(m.data());
                         mssg = makeMessage((String) v.elementAt(0), integerToString(count + 1));
-                        // is mssg destination is hub then...
                     } else if (isHub) {
                         d.add(stringToInteger(m.data()) + 1);
                     }
