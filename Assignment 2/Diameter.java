@@ -38,7 +38,7 @@ public class Diameter extends Algorithm {
         try {
             while (waitForNextRound()) { // Main loop. All processors wait here for the beginning of the next round.
                 // Your code goes here 
-				if (mssg != null) {
+		if (mssg != null) {
                     send(mssg);
                     return stringToInteger(mssg.data());
                 }
