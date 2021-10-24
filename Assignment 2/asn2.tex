@@ -1,0 +1,212 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{fullpage}
+\usepackage[top=2cm, bottom=4.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=blue,
+  linkbordercolor={0 0 1}
+}
+ 
+\renewcommand\lstlistingname{Algorithm}
+\renewcommand\lstlistlistingname{Algorithms}
+\def\lstlistingautorefname{Alg.}
+
+\lstdefinestyle{Python}{
+    language        = Python,
+    frame           = lines, 
+    basicstyle      = \footnotesize,
+    keywordstyle    = \color{blue},
+    stringstyle     = \color{green},
+    commentstyle    = \color{red}\ttfamily
+}
+
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+
+
+% Edit these as appropriate
+\newcommand\course{CS 4438}
+\newcommand\hwnumber{2}                  % <-- homework number
+\newcommand\NetIDa{Wenxi Chen}           % <-- NetID of person #1
+\newcommand\NetIDb{wchen466}           % <-- NetID of person #2 (Comment this line out for problem sets)
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\NetIDa}
+\lhead{\NetIDa\\\NetIDb}                 % <-- Comment this line out for problem sets (make sure you are person #1)
+\chead{\textbf{\Large Assignment \hwnumber}}
+\rhead{\course \\ \today}
+\lfoot{}
+\cfoot{}
+\rfoot{\small\thepage}
+\headsep 1.5em
+
+
+
+\begin{document}
+\newpage
+\section*{Question 1}
+\subsection* {Time complexity and communication complexity}
+\textbf{Time complexity} \\
+In the original algorithm we went through in class, the first phase of the message travels a distance of $2^0$ and then it is sent back to the processor p with the largest ID. The next phase will have the distance of $2^1$ and the one after that will have to travel $2^1$ before turning around until reaching the largest ID. In this modified network and algorithm, every processors except the largest processor are identical. Even with\\ \\
+\texttt {if id = id' and d = 1 then status <- Not Leader}\\ \\
+you will have to visit all the processors before finally sending out the END message. Therefore, the time complexity of this algorithm is number of rounds:\\ \\
+$f(n) = 2^1 + 2^2 + 2^3 + ... + 2^{i+1} + n = \sum_{j = 1}^{i + 1} 2^j + n = 2^{i+2} - 2 + n = 4n + n - 2 = O(n)$ \\ \\
+
+\textbf{Communication complexity} \\
+Likewise, this algorithm will send messages to the same number of active processors compare to the original algorithm in order to reach the largest ID while travelling to the right. In phase 0, there are $n$ active processors and less than $2n$ messages will be sent. In phase 1, there are $n/2$ active processors and less than $n/(2^{0}+1)*2^2$ messages will be sent...and so on. Therefore, the communication complexity of this algorithm is the number of messages: \\ \\
+$f(n) = 2n + (\dfrac{n}{2^{0}+1}*2^2) + (\dfrac{n}{2^{1}+1}*2^3) + ... + (\dfrac{n}{2^{i-1}+1}*2^{i+1}) + n = 3n + \sum_{j = 0}^{i - 1} \dfrac{n}{2^{j}+1}*2^{j+2} $ \\ \\
+
+$3n + \sum_{j = 0}^{i - 1} \dfrac{n}{2^{j}+1}*2^{j+2} < 3n + \sum_{j = 0}^{i - 1} \dfrac{n}{2^{j}}*2^{j+2}$ \\ \\
+
+$3n + \sum_{j = 0}^{i - 1} \dfrac{n}{2^{j}}*2^{j+2} = 3n + \sum_{j = 0}^{i - 1} 4n = 3n + 4n log_{2}n = O(nlogn)$ \\ \\
+
+\newpage
+\section*{Question 2}
+\subsection* {Algorithm}
+Algorithm \textbf{findPosition} (id)\\
+\texttt {In: Processor id\\
+\texttt Out: The number of processors to the left of each processor\\ \\
+\texttt private static int count <- 0 \\
+\texttt boolean leftmostProcessor <- TRUE if you do not have any neighbours to the left \\
+\texttt boolean rightmostProcessor <- TRUE if you do not have any neighbours to the right \\
+\texttt if (both rightmostProcessor and leftmostProcessor are true) return 0 \\ \\
+\texttt Initial message mssg consists of two parameters: rightNeighbour and id \\
+\texttt increment count by 1\\ \\
+\texttt Loop:\\
+\texttt if (mssg != null) then send mssg to right neighbour \\ 
+\hphantom{~~~~}if (mssg is travelling to the left) return count \\
+\hphantom{~~~~}if (mssg's data = "END") decrement by 1 and return count \\
+\texttt mssg <- null \\
+\texttt m <- receive message \\
+\texttt if (m != null) \\
+\hphantom{~~~~} if (m is coming from the left and its data is not "END") \\
+\hphantom{~~~~~~~~} send mssg to right neighbour and increment count by 1\\
+\hphantom{~~~~~~~~}if (rightmostProcessor)\\
+\hphantom{~~~~~~~~~~~~}send mssg to the left neighbour\\
+\hphantom{~~~~}else \\
+\hphantom{~~~~~~~~}send mssg to the left neighbour and decrement count by 1\\
+\hphantom{~~~~~~~~}if (lefttmostProcessor)\\
+\hphantom{~~~~~~~~~~~~}send mssg to the right neighbour with data = "END"\\
+\texttt return 0} \\
+
+\subsection* {Java implementation}
+See Position.java
+\subsection* {Proof of termination}
+Once the rightmost processor has been reached, the message will proceed to travel to the left until it reaches the leftmost processor. For each processor it visits on its way back (to the left), the algorithm returns the current count. You return $n-1$ times. In the end when you finally reach the leftmost processor, you will send a message containing "END" to your right neighbour, and in the next round, it will check if the mssg contains "END". If it does, it means the leftmost processor has been reached, therefore it will return one last time. There will be $n$ returns in total which equals the the number of processors. Therefore all the processors terminate the execution of the algorithm.
+\subsection* {Proof of correctness}
+Let $p_{0}$, $p_{n}$ be the leftmost and rightmost processor. When travelling from $p_{0}$ to $p_{n}$, for every processor it passes, count increments by $1$. Once the algorithm arrives $p_{n}$, the count will equals to $n-1$. The count is returned and the direction of travel changes, now travelling to the left. For each process it visits, count decrements by $1$. Once we arrive $p_{0}$, the count should be $0$. Now we have successfully returned the number of processor to the left of our current processor, for each processor. 
+\subsection* {Time complexity and communication complexity}
+\textbf{Time complexity} \\
+$f(n) = n + n = 2n = O(n)$ \\ \\
+\textbf{Communication complexity} \\
+$f(n) = n + n = 2n = O(n)$ \\ \\
+\newpage
+
+\section*{Question 3}
+\subsection* {Algorithm}
+Algorithm \textbf{findLargest} (id)\\
+\texttt {In: Processor id\\
+\texttt Out: Leader, if id is the largest in the ring, or NotLeader, otherwise\\ \\
+\texttt Initial message mssg consists of two parameters: leftNeighbour and id. \\
+\texttt Initial status <- unknown.\\ \\
+\texttt Loop:\\
+\texttt if (mssg != null) then send mssg to left neighbour \\ 
+\hphantom{~~~~}if mssg contains status "END" return leaderID \\
+\texttt mssg <- null \\
+\texttt m <- receive message \\
+\texttt if (m != null) \\
+\hphantom{~~~~} if (status of m equals to "END") \\
+\hphantom{~~~~~~~~} if (source of m equals the current right neighbour) \\
+\hphantom{~~~~~~~~~~~~} send mssg to left neighbour with status = "END" \\
+\hphantom{~~~~~~~~} else \\
+\hphantom{~~~~~~~~~~~~} send mssg to right neighbour with status = "END" \\
+\hphantom{~~~~} else \\
+\hphantom{~~~~~~~~} if (the data received = id) \\
+\hphantom{~~~~~~~~~~~~} send mssg to left neighbour with status = "END" \\
+\hphantom{~~~~~~~~~~~~} status <- "Leader" \\
+\hphantom{~~~~~~~~~~~~} LeaderID <- id \\
+\hphantom{~~~~~~~~} else if (the data received is larger than id) \\
+\hphantom{~~~~~~~~~~~~} if (source of m = right neighbour) \\
+\hphantom{~~~~~~~~~~~~~~~~} send mssg to left neighbour with data of m \\
+\hphantom{~~~~~~~~~~~~} else \\
+\hphantom{~~~~~~~~~~~~~~~~} send mssg to right neighbour with data of m \\
+\hphantom{~~~~~~~~~~~~} if (status = "unknown") \\
+\hphantom{~~~~~~~~~~~~~~~~} status <- "Not leader" \\
+\hphantom{~~~~~~~~} else \\
+\hphantom{~~~~~~~~~~~~} mssg <- null \\
+\texttt return 0} \\
+
+\subsection* {Java implementation}
+See LargestID.java
+\subsection* {Proof of termination}
+Once the processor with largest id changes its status to Leader, it creates and END message. \\
+The END message is never discarded, but it is always forwarded to the right (or left) neighbour; hence all processors will receive the END message. \\
+After forwarding the END message the algorithm terminates, so all the processors terminate the execution of the algorithm.
+\subsection* {Proof of correctness}
+Let $p_{max}$ be the processor with the largest id. This algorithm will never discard the message containing $p_{max}$'s id. \\
+Therefore, all processors will receive and forward the message with $p_{max}$'s id to its right (or left) neighbour, changing their status to NotLeader. \\
+When $p_{max}$ receives a message with its own id, all other processors will have received it and hence $p_{max}$ knows that it has the largest id and so it correctly changes its status to Leader, then the program terminates.\\
+\subsection* {Time complexity and communication complexity}
+\textbf{Time complexity} \\
+$f(n) = n + n = 2n = O(n)$ \\ \\
+\textbf{Communication complexity} \\
+$f(n) = n + n = 2n = O(n)$ \\ \\
+\newpage
+\section*{Question 4}
+\subsection* {Algorithm}
+Algorithm \textbf{findDiameter} (id)\\
+\texttt {In: Processor id\\
+\texttt Out: The maximum distance between two processors in the network\\ \\
+\texttt private static int count <- 0 \\
+\texttt Vector d <- new integer Vector stores the order of each spoke \\
+\texttt isTerminal <- TRUE if size of v = 1 \\
+\texttt isSpoke <- TRUE if size of v = 2 \\
+\texttt isHub <- TRUE if size of v >= 3 \\ \\ 
+\texttt Initial message mssg send to the closer neighbour to hub along with count as data \\
+\texttt Loop: \\
+\texttt if (mssg != null) \\
+\hphantom{~~~~} send message \\
+\hphantom{~~~~} return the current data, which is the count \\
+\texttt mssg <- null \\
+\texttt m <- receive message \\
+\texttt if (m != null) \\
+\hphantom{~~~~} if (isSpoke) \\
+\hphantom{~~~~~~~~} count <- m.data() \\
+\hphantom{~~~~~~~~} send mssg to the close neighbour to the hub with count + 1 as data \\
+\hphantom{~~~~} else if (isHub) \\
+\hphantom{~~~~~~~~} add m.data() + 1 to Vector d \\
+\hphantom{~~~~} if (the size of Vector d equals to the size of Vector v) // no more processors\\
+\hphantom{~~~~~~~~} return the combine value of the last element and the second to last element \\
+\texttt return 0} \\
+
+\subsection* {Java implementation}
+See Diameter.java
+\newpage
+\subsection* {Proof of termination}
+This algorithm will and always terminate once the size of Vector d equals to the size of Vector v. Each spoke will send a message at some point to the Hub with its length and it will be stored immediately to d. Once d and v has the same size, it will return the combined value of the least two elements added, which represents the longest two spoke. The algorithm will not terminate until it receives a value from all spokes. Nor it will not terminate since the algorithm compares v and d's size every round.
+\subsection* {Proof of correctness}
+This algorithm will always return the combined value of last two values being added into Vector v. When the hub received the last value from the longest spoke and add it to to d, it checks for the size of d and v. If they are equal, it means all spokes has sent their length to hub. We then return the correct answer.
+\subsection* {Time complexity and communication complexity}
+\textbf{Time complexity} \\
+$f(n) = n = O(n)$ \\ \\
+\textbf{Communication complexity} \\
+$f(n) = n = O(n)$ \\ \\
+
+
+
+\end{document}
