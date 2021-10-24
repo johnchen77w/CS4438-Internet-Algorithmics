@@ -17,11 +17,11 @@ public class Position extends Algorithm {
         String leftNeighbour = (String) v.elementAt(0);
         String rightNeighbour = (String) v.elementAt(1);
 
-            boolean leftmostProcessor, rightmostProcessor;
-            if (equal(leftNeighbour,"0")) leftmostProcessor = true;
-            else leftmostProcessor = false;
-            if (equal(rightNeighbour,"0")) rightmostProcessor = true;
-            else rightmostProcessor = false;
+        boolean leftmostProcessor, rightmostProcessor;
+        if (equal(leftNeighbour,"0")) leftmostProcessor = true;
+        else leftmostProcessor = false;
+        if (equal(rightNeighbour,"0")) rightmostProcessor = true;
+        else rightmostProcessor = false;
 
         // handle the special case where no messages need to be sent (i.e. only one node in network)
         if (leftmostProcessor && rightmostProcessor) return 1;
