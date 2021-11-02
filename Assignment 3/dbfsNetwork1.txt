@@ -1,0 +1,31 @@
+Mode identical
+
+AddNode 1: 64 66
+AddNode 58: 2 9
+AddNode 3: 60 64
+AddNode 62: 5 60
+AddNode 5: 62 9
+AddNode 68: 11 66
+AddNode 2: 58 9
+AddNode 60: 3 62 9
+AddNode 9: 58 5 2 60
+AddNode 64: 1 3 11
+AddNode 11: 68 64 66
+AddNode 66: 1 68 11
+
+PlaceNode 60: 500 50
+PlaceNode 9: 300 200
+PlaceNode 62: 500 200 
+PlaceNode 3: 700 100
+PlaceNode 2: 100 400
+PlaceNode 58: 290 400
+PlaceNode 5: 400 400
+PlaceNode 66: 500 450
+PlaceNode 1: 600 300
+PlaceNode 64: 800 240
+PlaceNode 68: 750  550
+PlaceNode 11: 850 400
+
+LoadAlgorithm DBFS
+
+RoundTime 1000
