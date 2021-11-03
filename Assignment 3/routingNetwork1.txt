@@ -1,0 +1,26 @@
+Mode Tree
+
+AddNode 10: 15 20 25
+AddNode 15: 30
+AddNode 20
+AddNode 25: 35 40
+AddNode 35
+AddNode 40
+AddNode 30: 45 50
+AddNode 45
+AddNode 50
+
+RootNode 10
+
+PlaceNode 10: 200 0
+PlaceNode 15: 0 200
+PlaceNode 20: 200 200
+PlaceNode 25: 400 200
+PlaceNode 35: 300 400
+PlaceNode 40: 500 400
+PlaceNode 30: 0 400
+PlaceNode 45: 0 600
+PlaceNode 50: 200 600
+
+LoadAlgorithm ComputeRouting
+RoundTime 1000
