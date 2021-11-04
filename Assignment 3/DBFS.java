@@ -17,8 +17,8 @@ public class DBFS extends Algorithm {
             Message message = null; // Receive
             Message ack1 = null;
             Message ack2 = null;
-            String parent1 = "unknown";
-            String parent2 = "unknown";
+            String parent1 = null;
+            String parent2 = null;
             Vector<String> children1 = new Vector<String>(); // Children list 1
             Vector<String> children2 = new Vector<String>(); // Children list 2
             String[] data; // Data transmitted each message
@@ -35,8 +35,8 @@ public class DBFS extends Algorithm {
             } else {
                 mssg1 = null;
                 mssg2 = null;
-                parent1 = "unknown";
-                parent2 = "unknown";
+                parent1 = null;
+                parent2 = null;
             }
             ack1 = null;
             ack2 = null;
@@ -68,26 +68,26 @@ public class DBFS extends Algorithm {
                     data = unpack(message.data());
                     if (data[1].split(" ")[0].equals("?")) { // Request for adoption
                         if (data[1].split(" ")[1].equals("1")) {
-                            if (equal(parent1, "unknown")) { // Parent not set yet
+                            if (parent1 == null) { // Parent not set yet
                                 parent1 = data[0];
                                 adjacent1.remove(parent1); // Request for adoption will not be sent to parent
                                 mssg1 = makeMessage(adjacent1, pack(id, "?" + " " + "1")); // Sent own adoption requests
-                                                                                          // to neighbours
+                                                                                           // to neighbours
                                 ack1 = makeMessage(parent1, pack(id, "Y" + " " + "1")); // Agree to be child of parent
                             } else {
                                 adjacent1.remove(data[0]); // Do not send request for adoption for processors
-                                                          // that have send to this processor an adoption request
+                                                           // that have send to this processor an adoption request
                             }
                         } else if (data[1].split(" ")[1].equals("2")) {
-                            if (equal(parent2, "unknown")) { // Parent not set yet
+                            if (parent2 == null) { // Parent not set yet
                                 parent2 = data[0];
                                 adjacent2.remove(parent2); // Request for adoption will not be sent to parent
                                 mssg2 = makeMessage(adjacent2, pack(id, "?" + " " + "2")); // Sent own adoption requests
-                                                                                          // to neighbours
+                                                                                           // to neighbours
                                 ack2 = makeMessage(parent2, pack(id, "Y" + " " + "2")); // Agree to be child of parent
                             } else {
                                 adjacent2.remove(data[0]); // Do not send request for adoption for processors that have
-                                                          // send to this processor an adoption request
+                                                           // send to this processor an adoption request
                             }
                         }
                     } else if (data[1].split(" ")[0].equals("Y")) {
@@ -99,7 +99,7 @@ public class DBFS extends Algorithm {
                     }
                     message = receive();
                 }
-                if (!equal(parent1, "unknown") && !equal(parent2, "unknown")) {
+                if (parent1 != null && parent2 != null) {
                     if (rounds_left_ == 0) {
                         printParentsChildren(parent1, parent2, children1, children2);
                         return "";
