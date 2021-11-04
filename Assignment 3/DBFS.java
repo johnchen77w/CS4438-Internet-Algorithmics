@@ -40,17 +40,17 @@ public class DBFS extends Algorithm {
             }
             ack1 = null;
             ack2 = null;
-            int rounds_left_ = -1;
+            int rounds_left = -1;
 
             while (waitForNextRound()) {
                 /* Your algorithm goes here */
                 if (mssg1 != null) {
                     send(mssg1);
-                    rounds_left_ = 1;
+                    rounds_left = 1;
                 }
                 if (mssg2 != null) {
                     send(mssg2);
-                    rounds_left_ = 1;
+                    rounds_left = 1;
                 }
                 if (ack1 != null)
                     send(ack1);
@@ -73,10 +73,9 @@ public class DBFS extends Algorithm {
                                 mssg1 = makeMessage(adjacent1, pack(id, "?" + " " + "1")); // Sent own adoption requests
                                                                                            // to neighbours
                                 ack1 = makeMessage(parent1, pack(id, "Y" + " " + "1")); // Agree to be child of parent
-                            } else {
+                            } else
                                 adjacent1.remove(data[0]); // Do not send request for adoption for processors
                                                            // that have send to this processor an adoption request
-                            }
                         } else if (data[1].split(" ")[1].equals("2")) {
                             if (parent2 == null) { // Parent not set yet
                                 parent2 = data[0];
@@ -84,27 +83,24 @@ public class DBFS extends Algorithm {
                                 mssg2 = makeMessage(adjacent2, pack(id, "?" + " " + "2")); // Sent own adoption requests
                                                                                            // to neighbours
                                 ack2 = makeMessage(parent2, pack(id, "Y" + " " + "2")); // Agree to be child of parent
-                            } else {
+                            } else
                                 adjacent2.remove(data[0]); // Do not send request for adoption for processors that have
                                                            // send to this processor an adoption request
-                            }
                         }
                     } else if (data[1].split(" ")[0].equals("Y")) {
-                        if (data[1].split(" ")[1].equals("1")) {
+                        if (data[1].split(" ")[1].equals("1"))
                             children1.add(data[0]);
-                        } else if (data[1].split(" ")[1].equals("2")) {
+                        else if (data[1].split(" ")[1].equals("2"))
                             children2.add(data[0]);
-                        }
                     }
                     message = receive();
                 }
                 if (parent1 != null && parent2 != null) {
-                    if (rounds_left_ == 0) {
+                    if (rounds_left == 0) {
                         printParentsChildren(parent1, parent2, children1, children2);
                         return "";
-                    } else if (rounds_left_ == 1) {
-                        rounds_left_ = 0;
-                    }
+                    } else if (rounds_left == 1)
+                        rounds_left = 0;
                 }
             }
         } catch (SimulatorException e) {
