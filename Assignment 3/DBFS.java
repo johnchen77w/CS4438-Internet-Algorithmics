@@ -28,10 +28,10 @@ public class DBFS extends Algorithm {
 
             if (equal(id, "1")) { // Root 1
                 mssg1 = makeMessage(adjacent1, pack(id, "?" + " " + "1"));
-                parent1 = "";
+                parent1 = "null";
             } else if (equal(id, "2")) { // Root 2
                 mssg2 = makeMessage(adjacent2, pack(id, "?" + " " + "2"));
-                parent2 = "";
+                parent2 = "null";
             } else {
                 mssg1 = null;
                 mssg2 = null;
@@ -52,17 +52,16 @@ public class DBFS extends Algorithm {
                     send(mssg2);
                     rounds_left_ = 1;
                 }
-                if (ack1 != null) {
+                if (ack1 != null)
                     send(ack1);
-                }
-                if (ack2 != null) {
+                if (ack2 != null)
                     send(ack2);
-                }
+
                 mssg1 = null;
                 mssg2 = null;
                 ack1 = null;
                 ack2 = null;
-
+                // Receive message
                 message = receive();
                 while (message != null) {
                     data = unpack(message.data());
