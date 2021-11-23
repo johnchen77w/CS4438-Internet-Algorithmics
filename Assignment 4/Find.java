@@ -69,18 +69,21 @@ public class Find extends Algorithm {
 					result = result + keyValue + ":" + id + " ";
 					keyProcessed = true;
 				} else {
-					// If the key is not contained locally, check if it is contained in the successor
-					if (inSegment((hk(keyValue), hashID, hashSucc))) {
+					// If the key is not contained locally, check if it is contained in the
+					// successor
+					if (inSegment(hk(keyValue), hashID, hashSucc)) {
 						// You check by sending a message to S U C C
 						mssg = makeMessage(succ, pack("GET", keyValue, id));
 					} else {
-						// If not in S U C C you will need to itegrate through the finger table and to locate the ideal processor to contact
+						// If not in S U C C you will need to itegrate through the finger table and to
+						// locate the ideal processor to contact
 						int intervalDistance = -1;
 						for (int i = 0; i < m; i++) {
 							String currentFingerValue = fingerTable[i];
-							if (hk(keyValue) - hp(currentFingerValue) < intervalDistance && hk(keyValue) > hp(currentFingerValue) || intervalDistance == -1) {
+							if (hk(keyValue) - hp(currentFingerValue) < intervalDistance
+									&& hk(keyValue) > hp(currentFingerValue) || intervalDistance == -1) {
 								intervalDistance = hk(keyValue) - hp(currentFingerValue);
-								mssg = makeMessage(currentFingerValue, pack("LOOKUP"), keyValue, id);
+								mssg = makeMessage(currentFingerValue, pack("LOOKUP", keyValue, id));
 							}
 						}
 					}
@@ -88,8 +91,88 @@ public class Find extends Algorithm {
 			}
 
 			while (waitForNextRound()) { // Synchronous loop
-				/* Your code goes here */
-
+				if (mssg != null) {
+					send(mssg);
+					data = unpack(mssg.data());
+					// Algorithm terminates when receives "END", means there are no more keys that
+					// haven't been checked
+					if (data[0].equals("END") && searchKeys.size() == 0)
+						return result;
+				}
+				mssg = null;
+				message = receive();
+				while (message != null) {
+					data = unpack(message.data());
+					if (data[0].equals("GET")) {
+						// If this is the same GET message that this processor originally sent, then the
+						// key is not in the system
+						if (data[2].equals(id)) {
+							result = result + data[1] + ":not found ";
+							keyProcessed = true;
+						}
+						// This processor must contain the key, if it is in the system
+						else if (localKeys.contains(stringToInteger(data[1]))) {
+							mssg = makeMessage(data[2], pack("FOUND", data[1], id));
+						} else {
+							mssg = makeMessage(data[2], pack("NOT_FOUND", data[1]));
+						}
+					} else if (data[0].equals("LOOKUP")) {
+						// Forward the request
+						keyValue = stringToInteger(data[1]);
+						if (inSegment(hk(keyValue), hashID, hashSucc)) {
+							mssg = makeMessage(succ, pack("GET", keyValue, data[2]));
+						} else {
+							// If not in S U C C you will need to itegrate through the finger table and to
+							// locate the ideal processor to contact
+							int intervalDistance = -1;
+							for (int i = 0; i < m; i++) {
+								String currentFingerValue = fingerTable[i];
+								if (hk(keyValue) - hp(currentFingerValue) < intervalDistance
+										&& hk(keyValue) > hp(currentFingerValue) || intervalDistance == -1) {
+									intervalDistance = hk(keyValue) - hp(currentFingerValue);
+									mssg = makeMessage(currentFingerValue, pack("LOOKUP", keyValue, data[2]));
+								}
+							}
+						}
+					} else if (data[0].equals("FOUND")) {
+						result = result + data[1] + ":" + data[2] + " ";
+						keyProcessed = true;
+					} else if (data[0].equals("NOT_FOUND")) {
+						result = result + data[1] + ":not found ";
+						keyProcessed = true;
+					} else if (data[0].equals("END")) {
+						mssg = makeMessage(succ, "END");
+					}
+					message = receive();
+				}
+				if (keyProcessed) {
+					if (searchKeys.size() <= 0) // There are no more keys to find
+						mssg = makeMessage(succ, "END");
+					else {
+						keyValue = searchKeys.elementAt(0);
+						searchKeys.remove(0); // Do not search for same key twice
+						if (localKeys.contains(keyValue)) {
+							result = result + keyValue + ":" + id + " "; // Store location of key in the result
+							keyProcessed = true;
+						} else if (inSegment(hk(keyValue), hashID, hashSucc)) {// Check if key must be in successor
+							mssg = makeMessage(succ, pack("GET", keyValue, id));
+						} else {
+							// If not in S U C C you will need to itegrate through the finger table and to
+							// locate the ideal processor to contact
+							int intervalDistance = -1;
+							for (int i = 0; i < m; i++) {
+								String currentFingerValue = fingerTable[i];
+								if (hk(keyValue) - hp(currentFingerValue) < intervalDistance
+										&& hk(keyValue) > hp(currentFingerValue) || intervalDistance == -1) {
+									intervalDistance = hk(keyValue) - hp(currentFingerValue);
+									mssg = makeMessage(succ, pack("LOOKUP", keyValue, id)); // Key is not in successor
+								}
+							}
+						}
+					}
+					if (mssg != null)
+						keyProcessed = false;
+				}
 			}
 
 		} catch (SimulatorException e) {
@@ -175,5 +258,25 @@ public class Find extends Algorithm {
 			++i;
 		}
 		return result;
+	}
+
+	/* Determine whether hk(value) is in (hp(ID),hp(succ)] */
+	/* ---------------------------------------------------------------- */
+	private boolean inSegment(int hashValue, int hashID, int hashSucc) {
+		/* ----------------------------------------------------------------- */
+		if (hashID == hashSucc)
+			if (hashValue == hashID)
+				return true;
+			else
+				return false;
+		else if (hashID < hashSucc)
+			if ((hashValue > hashID) && (hashValue <= hashSucc))
+				return true;
+			else
+				return false;
+		else if (((hashValue > hashID) && (hashValue < SizeRing)) || ((0 <= hashValue) && (hashValue <= hashSucc)))
+			return true;
+		else
+			return false;
 	}
 }
